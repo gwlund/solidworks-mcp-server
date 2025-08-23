@@ -1,0 +1,188 @@
+# Gmail MCP Server - Cursor Rules
+
+## Project Overview
+This is a Model Context Protocol (MCP) server that provides Gmail integration with AI-powered email categorization, summarization, and response generation using Anthropic's Claude API.
+
+## Technology Stack
+- **Language**: Python 3.8+
+- **Framework**: MCP (Model Context Protocol) v0.5.0+
+- **APIs**: Gmail API, Anthropic Claude API, Use API of Application provided in instruction
+- **Authentication**: Google OAuth2, Anthropic API Key
+- **Dependencies**: google-api-python-client, anthropic, pydantic, python-dotenv
+- **Development**: pytest, black, flake8, mypy, isort
+
+## Project Structure
+```cursorrules:.cursorrules
+<code_block_to_apply_changes_from>
+```
+src/
+├── main.py              # MCP server entry point
+├── tools/
+│   └── gmail_tools.py   # Gmail API integration
+├── resources/
+│   └── email_resources.py # Email data resources
+├── prompts/
+│   └── email_prompts.py # AI prompt templates
+└── types/
+    └── __init__.py      # Type definitions
+```
+
+## Code Style & Formatting
+- **Formatter**: Use Black with default settings (88 character line length)
+- **Import sorting**: Use isort with Black compatibility
+- **Type hints**: Required for all functions and methods
+- **Docstrings**: Use Google-style docstrings for all public functions/classes
+- **Line length**: 88 characters (Black default)
+- **String quotes**: Prefer double quotes for consistency with Black
+
+## Python Conventions
+- Use async/await for all I/O operations (Gmail API, Claude API)
+- Use type hints from `typing` module extensively
+- Follow PEP 8 naming conventions:
+  - snake_case for functions, variables, modules
+  - PascalCase for classes
+  - UPPER_CASE for constants
+- Use dataclasses or Pydantic models for structured data
+- Prefer f-strings for string formatting
+
+## MCP Server Patterns
+- Always return `list[TextContent]` from tool handlers
+- Use proper MCP types: `Tool`, `Resource`, `Prompt`, `TextContent`
+- Handle errors gracefully and return error messages in TextContent
+- Log all tool calls and their results
+- Validate environment variables at startup
+- Use async handlers for all MCP operations
+
+## Gmail API Best Practices
+- Always handle `HttpError` exceptions from Google API
+- Use batch operations when possible for multiple emails
+- Respect Gmail API quotas and rate limits
+- Cache OAuth tokens properly in `config/token.json`
+- Use minimal required scopes: `gmail.readonly`, `gmail.send`, `gmail.modify`
+- Always decode base64 email content properly
+
+## Anthropic Claude Integration
+- Use environment variables for API key and model selection
+- Default to `claude-3-haiku-20240307` for cost efficiency
+- Handle API errors and rate limiting gracefully
+- Use structured prompts with clear instructions
+- Validate Claude responses before returning to client
+
+## Error Handling
+- Always use try-catch blocks for external API calls
+- Log errors with appropriate severity levels
+- Return user-friendly error messages in TextContent
+- Don't expose sensitive information (API keys, tokens) in error messages
+- Use specific exception types when possible
+
+## Logging
+- Use Python's `logging` module with structured messages
+- Log levels: INFO for normal operations, ERROR for failures, DEBUG for development
+- Include operation context in log messages (email IDs, tool names)
+- Format: `%(asctime)s - %(name)s - %(levelname)s - %(message)s`
+
+## Environment Configuration
+- Use `python-dotenv` for environment variable management
+- Required env vars: `ANTHROPIC_API_KEY`, `GMAIL_CREDENTIALS_PATH`
+- Optional env vars should have sensible defaults
+- Validate required environment variables at startup
+- Never commit `.env` files or credentials
+
+## Security
+- Never log or expose API keys, tokens, or email content
+- Use OAuth2 flow for authentication
+- Store credentials securely and exclude from version control
+- Validate all input parameters to prevent injection attacks
+- Use minimal required permissions for Gmail scopes
+
+## Testing
+- Write async tests using `pytest-asyncio`
+- Mock external API calls (Gmail, Claude)
+- Test error conditions and edge cases
+- Use fixtures for common test data
+- Test files should be in `tests/` directory with `test_` prefix
+
+## File Naming & Organization
+- Use descriptive, snake_case filenames
+- Group related functionality in modules
+- Keep modules focused and single-purpose
+- Use `__init__.py` for package exports
+- Place configuration files in `config/` directory
+
+## Dependencies
+- Pin major versions in `requirements.txt`
+- Use `requirements-dev.txt` for development dependencies
+- Keep dependencies minimal and well-justified
+- Regularly update dependencies for security
+
+## Common Patterns to Follow
+
+### Tool Implementation
+```python
+async def tool_name(self, param1: str, param2: Optional[int] = None) -> Dict[str, Any]:
+    """Tool description with clear parameter documentation."""
+    try:
+        logger.info(f"Executing tool_name with param1={param1}")
+        # Implementation
+        result = await some_async_operation()
+        return {"status": "success", "data": result}
+    except Exception as e:
+        logger.error(f"Error in tool_name: {e}")
+        raise
+```
+
+### Error Response Pattern
+```python
+except Exception as e:
+    logger.error(f"Error calling tool {name}: {e}")
+    return [TextContent(type="text", text=f"Error: {str(e)}")]
+```
+
+### Environment Variable Pattern
+```python
+self.setting = os.getenv('SETTING_NAME', 'default_value')
+```
+
+## Avoid These Patterns
+- Don't use synchronous operations for I/O
+- Don't hardcode API keys or credentials
+- Don't ignore exceptions from external APIs
+- Don't return raw exceptions to MCP clients
+- Don't use global variables for state
+- Don't commit sensitive configuration files
+
+## Claude AI Integration Guidelines
+- Use specific, structured prompts for consistent results
+- Include context about email categorization and response generation
+- Handle rate limiting and quota errors gracefully
+- Validate Claude's responses before using them
+- Use appropriate model for the task (haiku for simple operations)
+
+## Gmail-Specific Considerations
+- Gmail uses "STARRED" label for flagged emails
+- Handle Gmail's message threading properly
+- Use Gmail search syntax for filtering
+- Batch operations to reduce API calls
+- Handle large attachments appropriately
+- Respect user's Gmail organization (labels, folders)
+
+When making suggestions or implementing features, prioritize:
+1. Security and privacy (no data leakage)
+2. Reliability (proper error handling)
+3. Performance (efficient API usage)
+4. User experience (clear error messages)
+5. Maintainability (clean, documented code)
+```
+
+This `.cursorrules` file is specifically tailored to your Gmail MCP Server project and includes:
+
+1. **Project-specific context** about MCP servers and Gmail integration
+2. **Technology stack** guidelines for Python, MCP, Gmail API, and Claude API
+3. **Code style** rules consistent with your existing codebase
+4. **Security considerations** for handling sensitive email data and API keys
+5. **Error handling patterns** specific to external API integrations
+6. **Async programming** guidelines for I/O operations
+7. **Testing strategies** for MCP servers
+8. **Gmail-specific patterns** like handling starred emails and search queries
+
+The rules are based on the patterns I observed in your existing code and will help Cursor provide more relevant suggestions for your specific use case. You can save this as `.cursorrules` in your project root directory.
