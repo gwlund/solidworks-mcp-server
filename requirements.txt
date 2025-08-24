@@ -1,0 +1,25 @@
+# SolidWorks MCP Server Dependencies
+
+# MCP Framework
+mcp>=0.5.0
+
+# Environment Configuration
+python-dotenv>=1.0.0
+
+# SolidWorks API Integration
+# Note: SolidWorks API typically requires COM interface on Windows
+# pywin32>=306  # Uncomment for Windows SolidWorks API access
+
+# Anthropic Claude API
+anthropic>=0.8.0
+
+# Data Validation and Serialization
+pydantic>=2.0.0
+
+# Development Dependencies (install with: pip install -r requirements-dev.txt)
+# pytest>=7.0.0
+# pytest-asyncio>=0.21.0
+# black>=23.0.0
+# flake8>=6.0.0
+# mypy>=1.0.0
+# isort>=5.12.0

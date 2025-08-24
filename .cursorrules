@@ -89,10 +89,13 @@ src/
 
 ## Environment Configuration
 - Use `python-dotenv` for environment variable management
+- **Required**: Create `.env.example` file with sample values for all configuration variables
+- **Workflow**: Users copy `.env.example` to `.env` and customize with real values
 - Required env vars: `ANTHROPIC_API_KEY`, `SOLIDWORKS_API_KEY`, `SOLIDWORKS_INSTALL_PATH`
 - Optional env vars should have sensible defaults
 - Validate required environment variables at startup
-- Never commit `.env` files or credentials
+- Never commit `.env` files or credentials (only commit `.env.example`)
+- Always load environment variables using `python-dotenv` at application startup
 
 ## Security
 - Never log or expose API keys, tokens, or CAD file content
@@ -263,7 +266,36 @@ except Exception as e:
 
 ### Environment Variable Pattern
 ```python
+# Load environment variables at startup
+from dotenv import load_dotenv
+load_dotenv()  # Load from .env file
+
+# Access environment variables with defaults
 self.setting = os.getenv('SETTING_NAME', 'default_value')
+```
+
+### Environment Configuration Pattern
+```python
+# config.py - Environment variable management
+from dotenv import load_dotenv
+import os
+
+class Config:
+    @classmethod
+    def from_environment(cls):
+        """Load configuration from environment variables."""
+        load_dotenv()  # Load .env file
+        
+        # Validate required variables
+        required_vars = ['ANTHROPIC_API_KEY']
+        missing = [var for var in required_vars if not os.getenv(var)]
+        if missing:
+            raise ValueError(f"Missing required environment variables: {missing}")
+        
+        return cls(
+            anthropic_api_key=os.getenv('ANTHROPIC_API_KEY'),
+            solidworks_version=os.getenv('SOLIDWORKS_VERSION', '2025')
+        )
 ```
 
 ## Avoid These Patterns (Anti-SOLID)
