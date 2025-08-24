@@ -1,28 +1,26 @@
-# Gmail MCP Server - Cursor Rules
+# SolidWorks MCP Server - Cursor Rules
 
 ## Project Overview
-This is a Model Context Protocol (MCP) server that provides Gmail integration with AI-powered email categorization, summarization, and response generation using Anthropic's Claude API.
+This is a Model Context Protocol (MCP) server that provides SolidWorks integration with AI-powered CAD operations, file management, and automation using the SolidWorks API.
 
 ## Technology Stack
 - **Language**: Python 3.8+
 - **Framework**: MCP (Model Context Protocol) v0.5.0+
-- **APIs**: Gmail API, Anthropic Claude API, Use API of Application provided in instruction
-- **Authentication**: Google OAuth2, Anthropic API Key
-- **Dependencies**: google-api-python-client, anthropic, pydantic, python-dotenv
+- **APIs**: SolidWorks API, Anthropic Claude API, Use API of Application provided in instruction
+- **Authentication**: SolidWorks API Key, Anthropic API Key
+- **Dependencies**: solidworks-api, anthropic, pydantic, python-dotenv
 - **Development**: pytest, black, flake8, mypy, isort
 
 ## Project Structure
-```cursorrules:.cursorrules
-<code_block_to_apply_changes_from>
 ```
 src/
-├── main.py              # MCP server entry point
+├── main.py              # MCP server entry point (CLI args & initialization ONLY)
 ├── tools/
-│   └── gmail_tools.py   # Gmail API integration
+│   └── solidworks_tools.py # SolidWorks API integration
 ├── resources/
-│   └── email_resources.py # Email data resources
+│   └── cad_resources.py # CAD data resources
 ├── prompts/
-│   └── email_prompts.py # AI prompt templates
+│   └── cad_prompts.py   # AI prompt templates for CAD operations
 └── types/
     └── __init__.py      # Type definitions
 ```
@@ -35,8 +33,14 @@ src/
 - **Line length**: 88 characters (Black default)
 - **String quotes**: Prefer double quotes for consistency with Black
 
-## Python Conventions
-- Use async/await for all I/O operations (Gmail API, Claude API)
+## Python Conventions & SOLID Principles
+- **MANDATORY**: Follow SOLID design principles (https://realpython.com/solid-principles-python/)
+  - **Single Responsibility Principle (SRP)**: Each class should have only one reason to change
+  - **Open-Closed Principle (OCP)**: Classes should be open for extension, closed for modification
+  - **Liskov Substitution Principle (LSP)**: Derived classes must be substitutable for their base classes
+  - **Interface Segregation Principle (ISP)**: Clients should not depend on interfaces they don't use
+  - **Dependency Inversion Principle (DIP)**: Depend on abstractions, not concretions
+- Use async/await for all I/O operations (SolidWorks API, Claude API)
 - Use type hints from `typing` module extensively
 - Follow PEP 8 naming conventions:
   - snake_case for functions, variables, modules
@@ -44,6 +48,8 @@ src/
   - UPPER_CASE for constants
 - Use dataclasses or Pydantic models for structured data
 - Prefer f-strings for string formatting
+- Create abstract base classes (ABC) for interfaces and protocols
+- Use dependency injection for loose coupling between components
 
 ## MCP Server Patterns
 - Always return `list[TextContent]` from tool handlers
@@ -53,13 +59,13 @@ src/
 - Validate environment variables at startup
 - Use async handlers for all MCP operations
 
-## Gmail API Best Practices
-- Always handle `HttpError` exceptions from Google API
-- Use batch operations when possible for multiple emails
-- Respect Gmail API quotas and rate limits
-- Cache OAuth tokens properly in `config/token.json`
-- Use minimal required scopes: `gmail.readonly`, `gmail.send`, `gmail.modify`
-- Always decode base64 email content properly
+## SolidWorks API Best Practices
+- Always handle SolidWorks API exceptions and COM errors
+- Use batch operations when possible for multiple CAD operations
+- Respect SolidWorks API quotas and rate limits
+- Cache API connections and sessions properly
+- Use minimal required permissions for SolidWorks operations
+- Always validate CAD file formats and compatibility
 
 ## Anthropic Claude Integration
 - Use environment variables for API key and model selection
@@ -83,24 +89,35 @@ src/
 
 ## Environment Configuration
 - Use `python-dotenv` for environment variable management
-- Required env vars: `ANTHROPIC_API_KEY`, `GMAIL_CREDENTIALS_PATH`
+- Required env vars: `ANTHROPIC_API_KEY`, `SOLIDWORKS_API_KEY`, `SOLIDWORKS_INSTALL_PATH`
 - Optional env vars should have sensible defaults
 - Validate required environment variables at startup
 - Never commit `.env` files or credentials
 
 ## Security
-- Never log or expose API keys, tokens, or email content
-- Use OAuth2 flow for authentication
+- Never log or expose API keys, tokens, or CAD file content
+- Use secure authentication for SolidWorks API access
 - Store credentials securely and exclude from version control
 - Validate all input parameters to prevent injection attacks
-- Use minimal required permissions for Gmail scopes
+- Use minimal required permissions for SolidWorks operations
+- Sanitize file paths and CAD operation parameters
 
-## Testing
+## Test-Driven Development (TDD)
+- **MANDATORY**: Follow TDD methodology - write tests BEFORE implementation
+- **Red-Green-Refactor cycle**: 
+  1. Write a failing test (Red)
+  2. Write minimal code to make it pass (Green)
+  3. Refactor while keeping tests green (Refactor)
 - Write async tests using `pytest-asyncio`
-- Mock external API calls (Gmail, Claude)
+- Mock external API calls (SolidWorks, Claude)
 - Test error conditions and edge cases
 - Use fixtures for common test data
 - Test files should be in `tests/` directory with `test_` prefix
+- Achieve minimum 90% code coverage
+- Write unit tests for each class/method following SOLID principles
+- Write integration tests for API interactions
+- Use parametrized tests for multiple input scenarios
+- Test abstract base classes and their implementations separately
 
 ## File Naming & Organization
 - Use descriptive, snake_case filenames
@@ -115,9 +132,115 @@ src/
 - Keep dependencies minimal and well-justified
 - Regularly update dependencies for security
 
-## Common Patterns to Follow
+## Main.py Structure (MANDATORY)
+The `main.py` file should ONLY contain:
+1. Command line argument parsing (using `argparse` or `click`)
+2. Environment variable validation
+3. Class initialization and dependency injection
+4. MCP server startup
 
-### Tool Implementation
+```python
+# main.py - ONLY CLI args and initialization
+import argparse
+import asyncio
+from typing import Dict, Any
+
+from src.server import MCPServer
+from src.config import Config
+
+def parse_arguments() -> Dict[str, Any]:
+    """Parse command line arguments."""
+    parser = argparse.ArgumentParser(description="SolidWorks MCP Server")
+    parser.add_argument("--port", type=int, default=8080, help="Server port")
+    parser.add_argument("--debug", action="store_true", help="Enable debug mode")
+    return vars(parser.parse_args())
+
+async def main() -> None:
+    """Initialize and start the MCP server."""
+    args = parse_arguments()
+    config = Config.from_environment()
+    
+    server = MCPServer(config=config, **args)
+    await server.start()
+
+if __name__ == "__main__":
+    asyncio.run(main())
+```
+
+## SOLID Design Patterns to Follow
+
+### Single Responsibility Principle (SRP)
+```python
+# BAD: Multiple responsibilities
+class FileManager:
+    def read_file(self): pass
+    def compress_file(self): pass  # Different responsibility
+
+# GOOD: Single responsibility
+class FileReader:
+    def read_file(self): pass
+
+class FileCompressor:
+    def compress_file(self): pass
+```
+
+### Open-Closed Principle (OCP)
+```python
+# Use abstract base classes for extension
+from abc import ABC, abstractmethod
+
+class DataProcessor(ABC):
+    @abstractmethod
+    async def process(self, data: Any) -> Any:
+        pass
+
+class SolidWorksProcessor(DataProcessor):
+    async def process(self, data: Any) -> Any:
+        # Implementation
+        pass
+```
+
+### Liskov Substitution Principle (LSP)
+```python
+# Derived classes must be substitutable for base classes
+class Shape(ABC):
+    @abstractmethod
+    def area(self) -> float:
+        pass
+
+class Rectangle(Shape):
+    def area(self) -> float:
+        return self.width * self.height
+```
+
+### Interface Segregation Principle (ISP)
+```python
+# Split large interfaces into smaller, focused ones
+class Readable(ABC):
+    @abstractmethod
+    def read(self) -> str: pass
+
+class Writable(ABC):
+    @abstractmethod
+    def write(self, data: str) -> None: pass
+
+class FileHandler(Readable, Writable):  # Implement only needed interfaces
+    def read(self) -> str: pass
+    def write(self, data: str) -> None: pass
+```
+
+### Dependency Inversion Principle (DIP)
+```python
+# Depend on abstractions, not concretions
+class SolidWorksService:
+    def __init__(self, api_client: SolidWorksAPIClient):  # Depend on abstraction
+        self._api_client = api_client
+
+    async def process_cad_file(self, file_path: str) -> Dict[str, Any]:
+        return await self._api_client.process_file(file_path)
+```
+
+### Tool Implementation Pattern
 ```python
 async def tool_name(self, param1: str, param2: Optional[int] = None) -> Dict[str, Any]:
     """Tool description with clear parameter documentation."""
@@ -143,46 +266,68 @@ except Exception as e:
 self.setting = os.getenv('SETTING_NAME', 'default_value')
 ```
 
-## Avoid These Patterns
+## Avoid These Patterns (Anti-SOLID)
+- **Don't violate SRP**: Avoid classes with multiple responsibilities
+- **Don't violate OCP**: Don't modify existing classes for new functionality
+- **Don't violate LSP**: Don't create derived classes that break base class contracts
+- **Don't violate ISP**: Don't force clients to depend on unused interfaces
+- **Don't violate DIP**: Don't depend on concrete implementations
 - Don't use synchronous operations for I/O
 - Don't hardcode API keys or credentials
 - Don't ignore exceptions from external APIs
 - Don't return raw exceptions to MCP clients
 - Don't use global variables for state
 - Don't commit sensitive configuration files
+- Don't write implementation code in main.py (CLI args and initialization ONLY)
+- Don't skip writing tests before implementation (TDD violation)
+- Don't create large, monolithic classes
+- Don't use inheritance when composition is more appropriate
 
 ## Claude AI Integration Guidelines
 - Use specific, structured prompts for consistent results
-- Include context about email categorization and response generation
+- Include context about CAD operations and SolidWorks automation
 - Handle rate limiting and quota errors gracefully
 - Validate Claude's responses before using them
 - Use appropriate model for the task (haiku for simple operations)
 
-## Gmail-Specific Considerations
-- Gmail uses "STARRED" label for flagged emails
-- Handle Gmail's message threading properly
-- Use Gmail search syntax for filtering
-- Batch operations to reduce API calls
-- Handle large attachments appropriately
-- Respect user's Gmail organization (labels, folders)
+## SolidWorks-Specific Considerations
+- Handle SolidWorks COM interface properly
+- Manage SolidWorks application lifecycle (start/stop)
+- Use SolidWorks API versioning for compatibility
+- Batch CAD operations to reduce API calls
+- Handle large CAD files and assemblies appropriately
+- Respect SolidWorks file locking and concurrent access
+- Validate CAD file integrity before operations
 
 When making suggestions or implementing features, prioritize:
-1. Security and privacy (no data leakage)
-2. Reliability (proper error handling)
-3. Performance (efficient API usage)
-4. User experience (clear error messages)
-5. Maintainability (clean, documented code)
-```
+1. **SOLID principles compliance** (mandatory for all code)
+2. **Test-Driven Development** (write tests first)
+3. Security and privacy (no data leakage)
+4. Reliability (proper error handling)
+5. Performance (efficient API usage)
+6. User experience (clear error messages)
+7. Maintainability (clean, documented code)
 
-This `.cursorrules` file is specifically tailored to your Gmail MCP Server project and includes:
+## Development Workflow (MANDATORY)
+1. **Write failing test first** (Red phase of TDD)
+2. **Apply SOLID principles** when designing classes and interfaces
+3. **Write minimal code** to make test pass (Green phase)
+4. **Refactor** while keeping tests green (Refactor phase)
+5. **Ensure main.py only contains CLI args and initialization**
+6. **Review code against all SOLID principles** before committing
 
-1. **Project-specific context** about MCP servers and Gmail integration
-2. **Technology stack** guidelines for Python, MCP, Gmail API, and Claude API
-3. **Code style** rules consistent with your existing codebase
-4. **Security considerations** for handling sensitive email data and API keys
-5. **Error handling patterns** specific to external API integrations
-6. **Async programming** guidelines for I/O operations
-7. **Testing strategies** for MCP servers
-8. **Gmail-specific patterns** like handling starred emails and search queries
+This `.cursorrules` file is specifically tailored for the SolidWorks MCP Server project and includes:
 
-The rules are based on the patterns I observed in your existing code and will help Cursor provide more relevant suggestions for your specific use case. You can save this as `.cursorrules` in your project root directory.
+1. **SOLID design principles** as mandatory requirements (https://realpython.com/solid-principles-python/)
+2. **Test-Driven Development** methodology with Red-Green-Refactor cycle
+3. **Project-specific context** about MCP servers and SolidWorks integration
+4. **Technology stack** guidelines for Python, MCP, SolidWorks API, and Claude API
+5. **Code style** rules with SOLID compliance
+6. **Security considerations** for handling sensitive CAD data and API keys
+7. **Error handling patterns** specific to external API integrations
+8. **Async programming** guidelines for I/O operations
+9. **Testing strategies** for MCP servers with TDD approach
+10. **SolidWorks-specific patterns** for CAD operations and file handling
+11. **Main.py structure** restrictions (CLI args and initialization only)
+
+The rules enforce SOLID design principles and TDD methodology as core requirements for all development work.
