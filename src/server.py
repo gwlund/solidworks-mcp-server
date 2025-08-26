@@ -120,7 +120,12 @@ class MCPServer:
         # Create initialization options
         init_options = InitializationOptions(
             server_name="solidworks-mcp-server",
-            server_version="1.0.0"
+            server_version="1.0.0",
+            capabilities={
+                "tools": {},
+                "resources": {},
+                "prompts": {}
+            }
         )
         
         async with stdio_server() as (read_stream, write_stream):
