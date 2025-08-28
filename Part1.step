@@ -1,0 +1,15 @@
+ISO-10303-21;
+HEADER;
+FILE_DESCRIPTION(('STEP AP203','Configuration Controlled 3D Design'),'2;1');
+FILE_NAME('Part1.step','2025-08-27T15:58:15',('Claude Desktop','SolidWorks MCP Server'),('','',''),'','','');
+FILE_SCHEMA(('CONFIG_CONTROL_DESIGN'));
+ENDSEC;
+DATA;
+#1=PRODUCT_DEFINITION_CONTEXT('',#2,'design');
+#2=APPLICATION_CONTEXT('configuration controlled 3D design');
+#3=PRODUCT_DEFINITION('NONE',$,#1,#4);
+#4=PRODUCT_DEFINITION_FORMATION('1',$,#5);
+#5=PRODUCT('Part1.SLDPRT','Part1.SLDPRT','',(#6));
+#6=PRODUCT_CONTEXT('',#2,'design');
+ENDSEC;
+END-ISO-10303-21;
